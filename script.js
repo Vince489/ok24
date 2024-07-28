@@ -4,8 +4,6 @@ document.getElementById('gridSize').addEventListener('change', drawPixelArt);
 document.getElementById('saveButton').addEventListener('click', savePixelArt);
 
 let img, imageData, gridSize = 64;
-let colorMap = {};
-let colors = [];
 
 function handleImageUpload(event) {
     const file = event.target.files[0];
@@ -25,29 +23,12 @@ function handleImageUpload(event) {
                 // Draw image onto the temporary canvas at selected grid size
                 tempContext.drawImage(img, 0, 0, gridSize, gridSize);
                 imageData = tempContext.getImageData(0, 0, gridSize, gridSize);
-                extractColors(); // Extract colors to build the palette
+
                 drawPixelArt();
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
-    }
-}
-
-function extractColors() {
-    colorMap = {};
-    colors = [];
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const a = data[i + 3];
-        const key = `${r}-${g}-${b}`;
-        if (!colorMap[key]) {
-            colorMap[key] = colors.length;
-            colors.push([r, g, b]);
-        }
     }
 }
 
@@ -83,12 +64,9 @@ function drawPixelArt() {
             const r = data[index];
             const g = data[index + 1];
             const b = data[index + 2];
-            const a = data[index + 3];
-
-            const colorIndex = colorMap[`${r}-${g}-${b}`];
-            const [colorR, colorG, colorB] = colors[colorIndex] || [r, g, b];
-
-            context.fillStyle = `rgba(${colorR}, ${colorG}, ${colorB}, ${a / 255})`;
+            const a = data[index + 3] / 255;
+            
+            context.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
             context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
         }
     }
